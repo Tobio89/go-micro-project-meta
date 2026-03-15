@@ -51,7 +51,14 @@ services:
       MAIL_FROM_NAME: "Go Micro Mail Service"
       MAIL_FROM_ADDRESS: "do_not_reply@gmms.com"
 
-
+  listener-service:
+    build:
+      context: ./../listener-service
+      dockerfile: ./../listener-service/listener.dockerfile
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
   postgres:
     image: 'postgres:14.2'
     ports:
