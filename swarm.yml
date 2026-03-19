@@ -1,0 +1,101 @@
+version: "3"
+
+services:
+  broker-service:
+    image: tobio16/broker-service:1.0.0
+    ports:
+      - "8080:8080"
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  listener-service:
+    image: tobio16/listener-service:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  authentication-service:
+    image: tobio16/auth-service:1.0.0
+    # ports:
+      # - "8081:80"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      DSN: "host=postgres port=5432 user=postgres password=password dbname=users sslmode=disable timezone=Asia/Seoul connect_timeout=5"
+
+  logger-service:
+    image: tobio16/logger-service:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  mail-service:
+    image: tobio16/mail-service:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      MAIL_DOMAIN: localhost
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+      MAIL_USERNAME: ""
+      MAIL_PASSWORD: ""
+      MAIL_ENCRYPTION: none
+      MAIL_FROM_NAME: "Go Micro Mail Service"
+      MAIL_FROM_ADDRESS: "do_not_reply@gmms.com"
+
+  rabbitmq:
+    image: 'rabbitmq:3.9-alpine'
+    ports:
+      - "5672:5672"
+
+    restart: always
+    
+    deploy:
+      mode: global
+      
+    # volumes:
+    #   - ./db-data/rabbitmq/:/var/lib/rabbitmq/
+
+  mailhog:
+    # image: 'mailhog/mailhog:latest'
+    image: 'jcalonso/mailhog:latest'
+    deploy:
+      mode: global
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  mongo:
+    image: 'mongo:4.2.16-bionic'
+    deploy:
+      mode: global
+    ports:
+      - "27017:27017"
+    # restart: always
+    # deploy:
+    #   mode: replicated
+    #   replicas: 1
+    environment:
+      MONGO_INITDB_DATABASE: logs
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./db-data/mongo/:/data/db
+  
+  postgres:
+    image: 'postgres:14.2'
+    ports:
+      - "5432:5432"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: users
+    volumes:
+      - ./db-data/postgres/:/var/lib/postgresql/data/
