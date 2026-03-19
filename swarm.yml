@@ -2,7 +2,7 @@ version: "3"
 
 services:
   broker-service:
-    image: tobio16/broker-service:1.0.1
+    image: tobio16/broker-service:1.0.2
     ports:
       - "8080:8080"
     deploy:
