@@ -2,11 +2,25 @@ version: "3"
 
 services:
 
-  front-service:
-    image: tobio16/front-service:1.0.0
+  caddy:
+    image: tobio16/caddy-micro:1.0.0
     deploy:
       mode: replicated
       replicas: 1
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+
+  front-end:
+    image: tobio16/go-front-end:1.0.2
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      BROKER_URL: "http://backend"
 
   broker-service:
     image: tobio16/broker-service:1.0.2
@@ -55,7 +69,6 @@ services:
     image: 'rabbitmq:3.9-alpine'
     ports:
       - "5672:5672"
-
     restart: always
     
     deploy:
@@ -79,10 +92,6 @@ services:
       mode: global
     ports:
       - "27017:27017"
-    # restart: always
-    # deploy:
-    #   mode: replicated
-    #   replicas: 1
     environment:
       MONGO_INITDB_DATABASE: logs
       MONGO_INITDB_ROOT_USERNAME: admin
@@ -94,7 +103,6 @@ services:
     image: 'postgres:14.2'
     ports:
       - "5432:5432"
-    restart: always
     deploy:
       mode: replicated
       replicas: 1
@@ -104,3 +112,9 @@ services:
       POSTGRES_DB: users
     volumes:
       - ./db-data/postgres/:/var/lib/postgresql/data/
+
+
+volumes:
+  caddy_data: 
+    external: true
+  caddy_config:
