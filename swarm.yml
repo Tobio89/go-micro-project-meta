@@ -1,6 +1,13 @@
 version: "3"
 
 services:
+
+  front-service:
+    image: tobio16/front-service:1.0.0
+    deploy:
+      mode: replicated
+      replicas: 1
+
   broker-service:
     image: tobio16/broker-service:1.0.2
     deploy:
